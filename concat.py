@@ -3,6 +3,7 @@
 import sys
 import os
 import re
+# import logging
 from collections import defaultdict
 
 class FastqDirs():
@@ -17,22 +18,44 @@ class FastqDirs():
         idx = _paths.index(fqdir_path)
         return self.fqdirs[idx]
     
-    def simple_concat_script(self, outdir: str):
+    def concatenate_fastq(self, outdir: str):
+        client_sample_fastqlist_dict = self.fastq_overlap
+        for client in client_sample_fastqlist_dict.keys():
+            print(f"Processing client {client}...")
+            count = 0
+            samples = sorted(client_sample_fastqlist_dict[client].keys())
+            for sample in samples:
+                if len(client_sample_fastqlist_dict[client][sample]) > 0:
+                    print(f"Concatenating sample {sample}...")
+                    r1s = client_sample_fastqlist_dict[client][sample]["R1"]
+                    r1s = " ".join(r1s)
+                    os.popen(f"cat {r1s} > {outdir}/{sample}_S{count}_L001_R1_001.fastq.gz")
+
+                    r2s = client_sample_fastqlist_dict[client][sample]["R2"]
+                    r2s = " ".join(r2s)
+                    os.popen(f"cat {r2s} > {outdir}/{sample}_S{count}_L001_R2_001.fastq.gz")
+                    
+                    count += 1
+                else:
+                    sys.stderr.write(f"# Sample {sample} has no overlapping fastqs\n")
+
+    def print_concat_script(self, outdir: str):
         client_sample_fastqlist_dict = self.fastq_overlap
         for client in client_sample_fastqlist_dict.keys():
             print(f"#### {client}")
             count = 0
-            for sample in client_sample_fastqlist_dict[client]:
+            samples = sorted(client_sample_fastqlist_dict[client].keys())
+            for sample in samples:
                 if len(client_sample_fastqlist_dict[client][sample]) > 0:
                     print(f"## {sample}")
 
                     r1s = client_sample_fastqlist_dict[client][sample]["R1"]
                     r1s = " ".join(r1s)
-                    print(f"cat {r1s} > outdir/{sample}_S{count}_L001_R1_001.fastq.gz")
+                    print(f"cat {r1s} > {outdir}/{sample}_S{count}_L001_R1_001.fastq.gz")
 
                     r2s = client_sample_fastqlist_dict[client][sample]["R2"]
                     r2s = " ".join(r2s)
-                    print(f"cat {r2s} > outdir/{sample}_S{count}_L001_R2_001.fastq.gz")
+                    print(f"cat {r2s} > {outdir}/{sample}_S{count}_L001_R2_001.fastq.gz")
                     count += 1
                 else:
                     print(f"# Sample {sample} has no overlapping fastqs")
@@ -79,6 +102,7 @@ class FastqDirs():
             for fastqdir_path in fastqdirs_path:
                 fastqdir = self[fastqdir_path]
                 samples = fastqdir.get_client_samples(client)
+                sample = sorted(samples)
                 for sample in samples:
                     sample_dict[sample] += [fastqdir.path]
             sample_dict = dict(sample_dict)
