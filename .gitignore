@@ -1,0 +1,4 @@
+mock_*
+__pycache__
+*.ipynb*
+
