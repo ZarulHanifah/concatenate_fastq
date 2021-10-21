@@ -50,13 +50,13 @@ def validate_args(args):
 			if os.path.isdir(outdir):
 				if len(os.listdir(outdir)) > 1:
 					if not args.print_only:
-						print(f"Outdir {outdir} is not empty. Check please")
+						sys.stderr.write(f"Outdir {outdir} is not empty. Check please")
 						sys.exit(1)
 				else:
-					print(f"Outdir {outdir} is empty. Proceeding...")	
+					sys.stderr.write(f"Outdir {outdir} is empty. Proceeding...")	
 					pass
 			else:
-				print(f"Outdir {outdir} not found. Creating {outdir}")
+				sys.stderr.write(f"Outdir {outdir} not found. Creating {outdir}")
 				
 	def check_fastqdirs(fastqdirs_path):
 		for fastqdir_path in fastqdirs_path:

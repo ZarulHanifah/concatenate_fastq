@@ -40,6 +40,8 @@ class FastqDirs():
                     sys.stderr.write(f"# Sample {sample} has no overlapping fastqs\n")
 
     def print_concat_script(self, outdir: str):
+        if not os.path.isdir(outdir):
+            print(f"mkdir {outdir}")
         client_sample_fastqlist_dict = self.fastq_overlap
         for client in client_sample_fastqlist_dict.keys():
             print(f"#### {client}")
